@@ -20,10 +20,14 @@ for pattern in "$@"; do
     # Convert glob pattern to find-compatible pattern
     if [[ $pattern == *"*"* ]]; then
         # Handle glob patterns
-        FIND_CMD="$FIND_CMD ! -path \"$SOURCE_DIR/*$(echo $pattern | sed 's/\*/.*/g')\""
+        # Convert glob to find pattern and escape special characters
+        find_pattern=$(echo "$pattern" | sed 's/[.[\(*^$/]/\\&/g' | sed 's/\*/.*/g')
+        FIND_CMD="$FIND_CMD ! -path \"*/$find_pattern\""
     else
         # Handle exact matches and directories
-        FIND_CMD="$FIND_CMD ! -path \"$SOURCE_DIR/$pattern*\""
+        # Escape special characters in the pattern
+        find_pattern=$(echo "$pattern" | sed 's/[.[\(*^$/]/\\&/g')
+        FIND_CMD="$FIND_CMD ! -path \"*/$find_pattern*\""
     fi
 done
 
